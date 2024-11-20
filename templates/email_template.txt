@@ -1,0 +1,29 @@
+Hello,
+
+A user account has been created for [FULLNAME].
+A welcome email with credentials is shown below.
+We appreciate your support as we continue to improve our Services.
+
+Thank you
+
+Subject: Welcome to TEKsystems - Microsoft Office 365 account.
+
+Welcome to TEKsystems, [FULLNAME].
+
+We are excited to welcome you to the team. As a team member, you have been issued a Microsoft Office 365 account.
+
+Username: [GS_EMAIL]
+PW/Credentials: [PASSWORD]
+
+Before you can access your new user account, you will need to change your login credentials.
+
+Changing Your Login Credentials:
+    1. Go to Login.microsoftonline.com
+    2. Enter your username (full email address) and the temporary credential provided.
+    3. Update your credentials and confirm the change.
+    4. After this change, you can access the requested applications.
+
+If you need assistance accessing this account or have questions, please contact the Support Team via email at TGS_Hardware@Teksystems.com. or by calling (855) 698-3549.
+
+Thank you,
+TGS (TEK GLOBAL SERVICES) HARDWARE DEPOT
