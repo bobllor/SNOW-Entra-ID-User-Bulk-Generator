@@ -23,7 +23,7 @@ def file_checker(path: str, *, text_file: str = None, contents: str = None) -> b
             with open(new_path, 'w') as f:
                 f.write(contents)
 
-azure_template_folder = str(Path.home() / 'Downloads' / 'Azure Emails')
+azure_template_folder = str(Path.home() / 'Downloads' / 'Azure_Emails')
 
 template_path = './templates'
 email_file = 'email_template.txt'

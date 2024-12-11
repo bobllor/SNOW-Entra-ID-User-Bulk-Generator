@@ -18,7 +18,7 @@ class EmailMaker:
         base_template = self.email_template
         date = datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
 
-        file_path = self.down_path + f'/Azure Emails/{date}'
+        file_path = self.down_path + f'/Azure_Emails/{date}'
         if not Path.exists(Path(file_path)):
             Path(file_path).mkdir(parents=True, exist_ok=True)
 

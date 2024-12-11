@@ -16,7 +16,7 @@ class CSVMaker:
 
     def create_csv(self):
         date = datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
-        csv_file_path = f'{self.path}/Azure Emails/'
+        csv_file_path = f'{self.path}/Azure_Emails/'
         file_name = f'csv_bulk-{date}.csv'
         
         with open(csv_file_path + file_name, 'w') as file:
