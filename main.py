@@ -1,4 +1,7 @@
 import pandas as pd
+import support.menu as menu
+import os
+from getpass import getpass
 from core.csv_maker import CSVMaker
 from core.email_maker import EmailMaker
 from tkinter import filedialog
@@ -7,49 +10,61 @@ from support.validation import name_validation, get_name, check_columns
 from support.pwd_gen import gen_pwd
 from support.mapping import sc_keys
 from support.menu import format_text as ft
-import support.menu as menu
 
 down_path = str(Path.home() / 'Downloads')
 with open('./templates/email_template.txt', 'r') as file:
     template = file.read()
 
+clear = lambda: os.system('clear')
+pause = lambda: getpass(ft('\nPress "Enter" to continue.'))
+
 def select_file(*, vtb: bool = True) -> str:
-    if vtb:
-        title = 'Select a sc_req_item file'
-    else:
-        title = 'Select a u_hardware_support file'
+    '''Prompts a dialog to select a file of csv.
+
+    If no file is given or a non-csv file is used, then `FileNotFoundError` is raised.
+    '''
+    print(ft('\nSelecting a file...'))
+
+    title = 'Select a sc_req_item file' if vtb else 'Select a u_hardware_support file'
+
     selected_file = filedialog.askopenfilename(initialdir=down_path, filetypes=[('CSV Files', '*.csv')]
                                                , title=title)
 
+    if not selected_file or Path(selected_file).suffix != '.csv':
+        raise FileNotFoundError
+    
     return selected_file
 
 if __name__ == '__main__':
     while True:
-        menu.menu()
-        option = menu.choice(valid_options={'m', 's', 'q'})
+        clear()
+
+        option = menu.choice(valid_options={'m', 's', 'q', 'i'})
 
         try:
             if option == 'm':
                 csv_file_vtb = select_file()
-                csv_file_builds = select_file()
-                
-                if csv_file_builds and csv_file_vtb:
-                    # VTB CSV file, this should start with "sc_req_item"
-                    df_vtb = pd.read_csv(csv_file_vtb)
+                csv_file_builds = select_file(vtb=False)
 
-                    # BUILDS CSV file, this should start with "u_hardware_support"
-                    df_builds = pd.read_csv(csv_file_builds)
-                    
-                    if check_columns(list(df_vtb.columns), multi_file=True, second_columns=list(df_builds.columns)):
-                        df = df_vtb[df_vtb['number'].isin(df_builds['u_ritm_number'])]
-                    else:
-                        # TODO: add proper exception handling...
-                        print('ERROR')
+                # VTB CSV file, this should start with "sc_req_item"
+                df_vtb = pd.read_csv(csv_file_vtb)
+
+                # BUILDS CSV file, this should start with "u_hardware_support"
+                df_builds = pd.read_csv(csv_file_builds)
+                
+                if check_columns(list(df_vtb.columns), multi_file=True, second_columns=list(df_builds.columns)):
+                    df = df_vtb[df_vtb['number'].isin(df_builds['u_ritm_number'])]
+                else:
+                    raise FileNotFoundError
             elif option == 's':
                 csv_file = select_file()
 
-                if csv_file:
-                    df = pd.read_csv(csv_file)
+                df = pd.read_csv(csv_file)
+
+                if not check_columns(df):
+                    raise FileNotFoundError
+            elif option == 'i':
+                raise Exception
             else:
                 break
 
@@ -84,6 +99,13 @@ if __name__ == '__main__':
             csvm = CSVMaker(new_df, down_path)
             csvm.create_csv()
 
-            print(ft('Finished generating accounts. Please check your downloads folder for the files.'))
+            print(ft(f'\nFinished generating accounts in {down_path + r"\Azure_Emails"}.'))
+            pause()
+        except FileNotFoundError:
+            clear()
+
+            print(ft('\n\tWARNING: An incorrect file type was detected.'))
+            print(ft('Only .csv files are allowed in the program.'))
+            pause()
         except Exception:
             pass
