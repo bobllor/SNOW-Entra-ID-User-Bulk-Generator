@@ -15,7 +15,7 @@ down_path = str(Path.home() / 'Downloads')
 with open('./templates/email_template.txt', 'r') as file:
     template = file.read()
 
-clear = lambda: os.system('clear')
+clear = lambda: os.system('cls' if os.name == 'nt' else 'clear')
 pause = lambda: getpass(ft('\nPress "Enter" to continue.'))
 
 def select_file(*, vtb: bool = True) -> str:
