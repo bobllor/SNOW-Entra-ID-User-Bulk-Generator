@@ -21,6 +21,6 @@ def choice(valid_options: Iterable[str]) -> str:
         
         if option not in valid_options:
             error = True
-            os.system('clear')
+            os.system('cls' if os.name == 'nt' else 'clear')
         else:
             return option
