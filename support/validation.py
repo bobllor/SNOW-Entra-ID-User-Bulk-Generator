@@ -1,20 +1,16 @@
 from .mapping import sc_keys, u_hard_keys
 
-def get_name(name: str, position: str) -> str:
-    name = name.title().strip()
-
-    # if there are multiple names.
-    if '-' in name:
-        names = name.split('-')
-    else:
-        names = name.split()
+def get_name(name: str, position: str = 'first') -> str:
+    name = name.title().strip() if '-' not in name else name.replace('-', ' ').title().strip()
+    
+    names = name.split()
 
     if position == 'first':
         if len(names) > 1:
             return names[0]
     else:
         if len(names) > 1:
-            suffixes = {'jr', 'sr', '1st', '2nd', '3rd', '4th', 'I', 'II', 'III', 'IV'}
+            suffixes = {'jr', 'sr', '1st', '2nd', '3rd', '4th', 'i', 'ii', 'iii', 'iv', '11'}
             
             # ensures that suffixes to a last name are not used.
             if name[-1].lower().strip('.') in suffixes:
