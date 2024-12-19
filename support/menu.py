@@ -17,7 +17,7 @@ def choice(valid_options: Iterable[str]) -> str:
         text = 'Enter an option: ' if not error else 'ERROR: Option not found. Enter a valid option: '
 
         menu()
-        option = input(f'\n\t{text}').lower()
+        option = input(f'\n{text}').lower()
         
         if option not in valid_options:
             error = True

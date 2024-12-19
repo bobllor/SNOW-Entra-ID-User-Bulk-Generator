@@ -16,7 +16,7 @@ with open('./templates/email_template.txt', 'r') as file:
     template = file.read()
 
 clear = lambda: os.system('cls' if os.name == 'nt' else 'clear')
-pause = lambda: getpass('\t\nPress "Enter" to continue.')
+pause = lambda: getpass('\n        Press "Enter" to continue.')
 
 def select_file(*, vtb: bool = True) -> str:
     '''Prompts a dialog to select a file of csv.
@@ -175,6 +175,6 @@ if __name__ == '__main__':
         except FileNotFoundError:
             clear()
 
-            ft('\nWARNING: An incorrect file type was detected.')
+            ft('\n\tWARNING: An incorrect file type was detected.')
             ft('Only .csv files are allowed in the program.')
             pause()
