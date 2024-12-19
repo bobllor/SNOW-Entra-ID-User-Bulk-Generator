@@ -1,4 +1,4 @@
-from .mapping import sc_keys, u_hard_keys
+from .mapping import sc_keys, u_hard_keys, custom_sc_keys
 
 def get_name(name: str, position: str = 'first') -> str:
     name = name.title().strip() if '-' not in name else name.replace('-', ' ').title().strip()
@@ -10,11 +10,11 @@ def get_name(name: str, position: str = 'first') -> str:
             return names[0]
     else:
         if len(names) > 1:
-            suffixes = {'jr', 'sr', '1st', '2nd', '3rd', '4th', 'i', 'ii', 'iii', 'iv', '11'}
+            suffixes = {'jr', 'sr', '1st', '2nd', '3rd', '4th', 'i', 'ii', 'iii', 'iv'}
             
             # ensures that suffixes to a last name are not used.
-            if name[-1].lower().strip('.') in suffixes:
-                return name[-2]
+            if names[-1].lower().strip('.') in suffixes or names[-1].lower().strip('.').isdigit():
+                return names[-2]
 
             return names[-1]
 
@@ -44,37 +44,30 @@ def check_columns(columns: list, *, multi_file: bool = False, second_columns: li
     (OPTIONAL) Default `False`. Indicates whether or not this is a multi-file selection, which compares the base columns
     with additional columns.
     '''
-    # single file, used to create accounts with orders that is requesting an azure account.
-    base_columns_sc = [sc_keys['number'], sc_keys['opened_at'], sc_keys['active'], sc_keys['opened_by'],    
-        sc_keys['first_name'], sc_keys['last_name'], sc_keys['country'], sc_keys['short_description'], sc_keys['org']]
-    
-    # multi file, used to filter out the VTB columns.
-    base_columns_builds = [u_hard_keys['ritm'], u_hard_keys['build'], u_hard_keys['state'],
-                           u_hard_keys['opened_on'], u_hard_keys['user'], u_hard_keys['built_by'],
-                           u_hard_keys['verified_by']]
-    
-    if not multi_file:
-        result = match_columns(columns, base_columns_sc)
+    r_sc_keys = {value: key for key, value in sc_keys.items()}
 
-        if not result:
+    if not multi_file:
+        if not match_columns(columns, r_sc_keys):
             return False
     else:
+        r_u_hard_keys = {value: key for key, value in u_hard_keys.items()}
+
         # iterate over the base columns to compare to.
-        iterator_one = [base_columns_sc, base_columns_builds]
+        iterator_one = [r_sc_keys, r_u_hard_keys]
         # iterate over the columns for comparing to.
         iterator_two = [columns, second_columns]
 
         for i in range(2):
-            result = match_columns(iterator_two[i], iterator_one[i])
-
-            if not result:
+            if not match_columns(iterator_two[i], iterator_one[i]):
                 return False
     
     return True
 
-def match_columns(columns: list, base_columns: list) -> bool:
-    for i, column in enumerate(columns):
-        if column != base_columns[i]:
-            return False
+def match_columns(columns: list, base_columns: dict) -> bool:
+    for column in columns:
+        if column not in base_columns:
+            for key in custom_sc_keys:
+                if key not in columns:
+                    return False
     
     return True
