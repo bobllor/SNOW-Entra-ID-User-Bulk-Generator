@@ -66,6 +66,7 @@ def check_columns(columns: list, *, multi_file: bool = False, second_columns: li
 def match_columns(columns: list, base_columns: dict) -> bool:
     for column in columns:
         if column not in base_columns:
+            # i am sorry. for this.
             for key in custom_sc_keys:
                 if key not in columns:
                     return False
