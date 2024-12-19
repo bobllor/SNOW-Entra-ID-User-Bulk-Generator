@@ -8,7 +8,13 @@ sc_keys = {
     'country': 'variables.55992e0ee1fc8a00c2ab91d15440c572',
     'short_description': 'short_description',
     'org': 'variables.192be7e5c545da0083a32ea450e6b65c',
-    
+}
+
+# "custom" CSV file that does not have the same columns as the report generated from the filter on SNOW.
+# long story short, these are used for "custom" CSV files.
+custom_sc_keys = {
+    'Name': 'Name',
+    'Organization': 'Organization',
 }
 
 u_hard_keys = {

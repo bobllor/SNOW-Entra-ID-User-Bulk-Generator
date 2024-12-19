@@ -8,7 +8,7 @@ from tkinter import filedialog
 from pathlib import Path
 from support.validation import name_validation, get_name, check_columns
 from support.pwd_gen import gen_pwd
-from support.mapping import sc_keys
+from support.mapping import sc_keys, custom_sc_keys
 from support.menu import format_text as ft
 
 down_path = str(Path.home() / 'Downloads')
@@ -27,10 +27,10 @@ def select_file(*, vtb: bool = True) -> str:
 
     title = 'Select a sc_req_item file' if vtb else 'Select a u_hardware_support file'
 
-    selected_file = filedialog.askopenfilename(initialdir=down_path, filetypes=[('CSV Files', '*.csv')]
+    selected_file = filedialog.askopenfilename(initialdir=down_path, filetypes=[('CSV Files', '*.csv *.xlsx')]
                                                , title=title)
 
-    if not selected_file or Path(selected_file).suffix != '.csv':
+    if not selected_file or Path(selected_file).suffix not in {'.xlsx', '.csv'}:
         raise FileNotFoundError
     
     return selected_file
@@ -80,11 +80,11 @@ if __name__ == '__main__':
                     raise FileNotFoundError
                 
             elif option == 's':
-                csv_file = select_file()
+                file = select_file()
 
-                df = pd.read_csv(csv_file)
+                df = pd.read_csv(file) if Path(file).suffix == '.csv' else pd.read_excel(file)
 
-                if not check_columns(df):
+                if not check_columns(list(df.columns)):
                     raise FileNotFoundError
                 
             elif option == 'i':
@@ -125,32 +125,45 @@ if __name__ == '__main__':
             else:
                 break
             
-            if option != 'i':
-                full_f_names = df.loc[:, sc_keys['first_name']].apply(name_validation)
-                full_l_names = df.loc[:, sc_keys['last_name']].apply(name_validation)
+            if option != 'i':              
+                if 'name' in {column.lower() for column in df.columns}:
+                    f_names = df['Name'].astype('str').apply(name_validation).apply(get_name).apply(lambda x: None if 'nan' == x.lower() else x).dropna()
+                    l_names = df['Name'].astype('str').apply(name_validation).apply(get_name, args=('last',)).apply(lambda x: None if 'nan' == x.lower() else x).dropna()
+                else:
+                    f_names = df.loc[:, sc_keys['first_name']].apply(name_validation).apply(get_name, args=('first',))
+                    l_names = df.loc[:, sc_keys['last_name']].apply(name_validation).apply(get_name, args=('last',))
 
-                f_names = full_f_names.apply(get_name, args=('first',))
-                l_names = full_l_names.apply(get_name, args=('last',))
                 full_names = f_names + ' ' + l_names
+                full_names = full_names.apply(lambda x: None if 'nan nan' in x.lower() else x).dropna()
 
-                countries = df.iloc[:, 6]
-                generated_pwds = []
-                for _ in range(df['number'].size):
-                    generated_pwds.append(gen_pwd())
+                try:
+                    countries = df.loc[:, sc_keys['country']].tolist()
 
-                # generate the usernames in the dataframe based on the organization value.
-                org_key = sc_keys['org']
+                    generated_pwds = [gen_pwd() for _ in range(df['number'].size)]
+
+                    ritms = df['number'].tolist()
+
+                    org_key = sc_keys['org']
+                except KeyError:
+                    # exception is used if a custom CSV file is used.
+                    countries = ['US' for _ in range(full_names.size)]
+
+                    generated_pwds = [gen_pwd() for _ in range(full_names.size)]
+
+                    ritms = ['NA' for _ in range(full_names.size)]
+
+                    org_key = custom_sc_keys['Organization']
 
                 # why does this happen... thanks pandas.
                 df = df.copy()
                 df.loc[df[org_key].isin(['GS', 'Staffing']), 'Username'] = f_names + '.' + l_names + '@teksystemsgs.com'
                 df.loc[df[org_key].isin(['Actalent', 'Aerotek', 'Aston Carter', 'MLA']), 'Username'] = f_names + '.' + l_names + '@ext.aerotek.com'
 
-                usernames = df['Username'].to_list()
+                usernames = df['Username'].dropna().to_list()
 
-                new_df = make_new_df(full_names.tolist(), usernames, generated_pwds, f_names.to_list(), l_names.to_list(), countries.to_list())
+                new_df = make_new_df(full_names.tolist(), usernames, generated_pwds, f_names.to_list(), l_names.to_list(), countries)
 
-                em = EmailMaker(down_path, template, full_names.to_list(), generated_pwds, usernames, df['number'].tolist())
+                em = EmailMaker(down_path, template, full_names.to_list(), generated_pwds, usernames, ritms)
                 em.generate_email()
 
                 csvm = CSVMaker(new_df, down_path)
@@ -162,6 +175,6 @@ if __name__ == '__main__':
         except FileNotFoundError:
             clear()
 
-            print(ft('\n\tWARNING: An incorrect file type was detected.'))
-            print(ft('Only .csv files are allowed in the program.'))
+            ft('\nWARNING: An incorrect file type was detected.')
+            ft('Only .csv files are allowed in the program.')
             pause()
