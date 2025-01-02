@@ -16,7 +16,7 @@ with open('./templates/email_template.txt', 'r') as file:
     template = file.read()
 
 clear = lambda: os.system('cls' if os.name == 'nt' else 'clear')
-pause = lambda: getpass('\n        Press "Enter" to continue.')
+pause = lambda: getpass('\nPress "Enter" to continue.')
 
 def select_file(*, vtb: bool = True) -> str:
     '''Prompts a dialog to select a file of csv.
@@ -157,7 +157,7 @@ if __name__ == '__main__':
                 # why does this happen... thanks pandas.
                 df = df.copy()
                 df.loc[df[org_key].isin(['GS', 'Staffing']), 'Username'] = f_names + '.' + l_names + '@teksystemsgs.com'
-                df.loc[df[org_key].isin(['Actalent', 'Aerotek', 'Aston Carter', 'MLA']), 'Username'] = f_names + '.' + l_names + '@ext.aerotek.com'
+                df.loc[df[org_key].isin(['Actalent', 'Aerotek', 'Aston Carter']), 'Username'] = f_names + '.' + l_names + '@ext.aerotek.com'
 
                 usernames = df['Username'].dropna().to_list()
 
